@@ -357,44 +357,11 @@ La aplicación implementa un sistema de caché de claves públicas usando LocalS
 
 ## 3. Evidencias de Implementación
 
-### 3.1 Capturas de Pantalla
+![alt text](image.png)
 
-[Espacio para adjuntar imagen: Interfaz principal de la aplicación]
+![alt text](image-1.png)
 
-[Espacio para adjuntar imagen: Generación de claves RSA]
+![alt text](image-2.png)
 
-[Espacio para adjuntar imagen: Obtención automática de clave pública]
+![alt text](image-3.png)
 
-[Espacio para adjuntar imagen: Envío de mensaje cifrado]
-
-[Espacio para adjuntar imagen: Recepción y descifrado de mensaje]
-
-[Espacio para adjuntar imagen: Consola mostrando IPs disponibles]
-
-[Espacio para adjuntar imagen: Contactos guardados]
-
-### 3.2 Diagramas
-
-[Espacio para adjuntar imagen: Diagrama de flujo RSA genérico]
-
-[Espacio para adjuntar imagen: Arquitectura del sistema]
-
-[Espacio para adjuntar imagen: Diagrama de red local/ZeroTier]
-
-### 3.3 Código Fuente Relevante
-
-[Espacio para adjuntar imagen: Fragmento de código - Clase CryptoManager]
-
-[Espacio para adjuntar imagen: Fragmento de código - Endpoint de cifrado]
-
-[Espacio para adjuntar imagen: Fragmento de código - Endpoint de descifrado]
-
-### 3.4 Pruebas de Funcionamiento
-
-[Espacio para adjuntar imagen: Prueba de conectividad entre dos dispositivos]
-
-[Espacio para adjuntar imagen: Validación de firewall configurado]
-
-[Espacio para adjuntar imagen: Mensaje cifrado en tráfico de red (Wireshark)]
-
-[Espacio para adjuntar imagen: Archivos de claves generados]
