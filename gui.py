@@ -118,9 +118,8 @@ class MensajeApp(ctk.CTk):
     def crear_tab_usuarios(self):
         """Crea la pestaña de gestión de usuarios."""
         self.tab_usuarios.grid_columnconfigure(0, weight=1)
-        
-        # Frame principal con padding
-        main_frame = ctk.CTkFrame(self.tab_usuarios, fg_color="transparent")
+        # Frame principal scrollable
+        main_frame = ctk.CTkScrollableFrame(self.tab_usuarios, fg_color="transparent")
         main_frame.grid(row=0, column=0, padx=40, pady=30, sticky="nsew")
         main_frame.grid_columnconfigure(0, weight=1)
         
@@ -196,8 +195,8 @@ class MensajeApp(ctk.CTk):
         """Crea la pestaña de mensajería."""
         self.tab_mensajes.grid_columnconfigure(0, weight=1)
         self.tab_mensajes.grid_rowconfigure(1, weight=1)
-        
-        main_frame = ctk.CTkFrame(self.tab_mensajes, fg_color="transparent")
+        # Frame principal scrollable
+        main_frame = ctk.CTkScrollableFrame(self.tab_mensajes, fg_color="transparent")
         main_frame.grid(row=0, column=0, padx=40, pady=30, sticky="nsew")
         main_frame.grid_columnconfigure(0, weight=1)
         main_frame.grid_rowconfigure(1, weight=1)
@@ -270,8 +269,8 @@ class MensajeApp(ctk.CTk):
     def crear_tab_claves(self):
         """Crea la pestaña de gestión de claves."""
         self.tab_claves.grid_columnconfigure(0, weight=1)
-        
-        main_frame = ctk.CTkFrame(self.tab_claves, fg_color="transparent")
+        # Frame principal scrollable
+        main_frame = ctk.CTkScrollableFrame(self.tab_claves, fg_color="transparent")
         main_frame.grid(row=0, column=0, padx=40, pady=30, sticky="nsew")
         main_frame.grid_columnconfigure(0, weight=1)
         
@@ -356,8 +355,8 @@ class MensajeApp(ctk.CTk):
     def crear_tab_red(self):
         """Crea la pestaña de configuración de red."""
         self.tab_red.grid_columnconfigure(0, weight=1)
-        
-        main_frame = ctk.CTkFrame(self.tab_red, fg_color="transparent")
+        # Frame principal scrollable
+        main_frame = ctk.CTkScrollableFrame(self.tab_red, fg_color="transparent")
         main_frame.grid(row=0, column=0, padx=40, pady=30, sticky="nsew")
         main_frame.grid_columnconfigure(0, weight=1)
         

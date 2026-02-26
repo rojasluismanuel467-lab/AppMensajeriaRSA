@@ -337,7 +337,10 @@ class GestorRed:
                 # Guardar mensaje enviado
                 if exito:
                     Path("mensajes").mkdir(exist_ok=True)
-                    nombre_archivo = f"mensajes/para_{ip}_{Path('mensajes').__len__()}.txt"
+                    # Use the number of files in 'mensajes' for unique filename
+                    mensajes_dir = Path("mensajes")
+                    count = len(list(mensajes_dir.glob("para_{}_*".format(ip))))
+                    nombre_archivo = f"mensajes/para_{ip}_{count}.txt"
                     try:
                         with open(nombre_archivo, 'w') as f:
                             f.write(mensaje_cifrado)
