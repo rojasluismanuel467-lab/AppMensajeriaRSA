@@ -313,12 +313,142 @@
             color: #1d6f3e;
             display: block;
         }
+
+        .ip-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .ip-input-group input {
+            flex: 1;
+        }
+
+        .btn-icon {
+            padding: 12px 20px;
+            min-width: auto;
+        }
+
+        .fetched-key-display {
+            background: #f5f5f7;
+            border: 1.5px solid #34c759;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .fetched-key-display.show {
+            display: block;
+        }
+
+        .fetched-key-display .label {
+            color: #34c759;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .fetched-key-display .key-preview {
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            font-size: 11px;
+            color: #1d1d1f;
+            max-height: 80px;
+            overflow-y: auto;
+            word-break: break-all;
+            line-height: 1.4;
+        }
+
+        .contacts-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1.5px solid #e5e5e7;
+        }
+
+        .contacts-section h3 {
+            font-size: 14px;
+            color: #1d1d1f;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .contact-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: #f5f5f7;
+            border: 1.5px solid #d2d2d7;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .contact-item:hover {
+            background: #e5e5e7;
+            border-color: #34c759;
+        }
+
+        .contact-item.selected {
+            background: #d1f4dd;
+            border-color: #34c759;
+        }
+
+        .contact-info {
+            flex: 1;
+        }
+
+        .contact-ip {
+            font-weight: 600;
+            color: #1d1d1f;
+            font-size: 14px;
+        }
+
+        .contact-date {
+            font-size: 11px;
+            color: #6e6e73;
+            margin-top: 2px;
+        }
+
+        .contact-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-delete {
+            background: #8e8e93;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        .btn-delete:hover {
+            background: #6e6e73;
+        }
+
+        .no-contacts {
+            text-align: center;
+            color: #6e6e73;
+            font-size: 13px;
+            padding: 20px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #e5e5e7;
+            border-top: 2px solid #34c759;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔐 Mensajería Cifrada RSA</h1>
+            <h1>Mensajería Cifrada RSA</h1>
             <p>Comunicación segura en red local con cifrado de extremo a extremo</p>
         </div>
 
@@ -327,7 +457,7 @@
         <div class="main-content">
             <!-- Sección de Claves -->
             <div class="card">
-                <h2>🔑 Mis Claves</h2>
+                <h2>Mis Claves</h2>
                 <div class="form-group">
                     <button class="btn" onclick="generateKeys()">Generar Nuevas Claves</button>
                 </div>
@@ -344,7 +474,7 @@
                             Click en "Generar Nuevas Claves" para crear tu par de claves
                         </div>
                         <button id="copyKeyButton" class="copy-button" onclick="copyPublicKey()" style="display: none;">
-                            📋 Copiar Clave Pública
+                            Copiar Clave Pública
                         </button>
                     </div>
                 </div>
@@ -356,19 +486,37 @@
 
             <!-- Sección de Enviar Mensaje -->
             <div class="card">
-                <h2>📤 Enviar Mensaje</h2>
+                <h2>Enviar Mensaje</h2>
+
+                <div class="contacts-section" id="contactsSection" style="display: none;">
+                    <h3>Contactos Guardados</h3>
+                    <div id="contactsList"></div>
+                </div>
+
                 <form id="sendMessageForm">
                     <div class="form-group">
                         <label for="recipientIp">IP del Destinatario:</label>
-                        <input type="text" id="recipientIp" placeholder="Ej: 192.168.1.100" required>
+                        <div class="ip-input-group">
+                            <input type="text" id="recipientIp" placeholder="Ej: 192.168.1.100" required>
+                            <button type="button" class="btn btn-icon" onclick="fetchPublicKey()" title="Obtener clave automáticamente">
+                                Obtener Clave
+                            </button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="recipientPort">Puerto (opcional):</label>
                         <input type="text" id="recipientPort" placeholder="5000" value="5000">
                     </div>
+
+                    <!-- Área para mostrar la clave obtenida -->
+                    <div id="fetchedKeyDisplay" class="fetched-key-display">
+                        <div class="label">Clave Pública Obtenida Automáticamente:</div>
+                        <div class="key-preview" id="fetchedKeyPreview"></div>
+                    </div>
+
                     <div class="form-group">
                         <label for="recipientPublicKey">Clave Pública del Destinatario:</label>
-                        <textarea id="recipientPublicKey" placeholder="Pega aquí la clave pública del destinatario..." required></textarea>
+                        <textarea id="recipientPublicKey" placeholder="Pega aquí la clave pública del destinatario o usa el botón Obtener Clave" required></textarea>
                         <div id="keyValidation" class="validation-message"></div>
                     </div>
                     <div class="form-group">
@@ -381,7 +529,7 @@
 
             <!-- Sección de Mensajes Recibidos -->
             <div class="card messages-section">
-                <h2>📥 Mensajes Recibidos</h2>
+                <h2>Mensajes Recibidos</h2>
                 <div class="button-group">
                     <button class="btn btn-small" onclick="loadMessages()">Actualizar Mensajes</button>
                     <button class="btn btn-secondary btn-small" onclick="clearMessages()">Limpiar Mensajes</button>
@@ -432,11 +580,11 @@
 
             try {
                 await navigator.clipboard.writeText(publicKey);
-                button.textContent = '✅ ¡Copiada!';
+                button.textContent = 'Copiada';
                 button.classList.add('copied');
 
                 setTimeout(() => {
-                    button.textContent = '📋 Copiar Clave Pública';
+                    button.textContent = 'Copiar Clave Pública';
                     button.classList.remove('copied');
                 }, 2000);
 
@@ -462,13 +610,165 @@
                 return { valid: false, message: 'Falta el final de la clave: -----END PUBLIC KEY-----' };
             }
 
-            // Verificar que tenga contenido entre el header y footer
             const content = trimmedKey.split('-----BEGIN PUBLIC KEY-----')[1]?.split('-----END PUBLIC KEY-----')[0];
             if (!content || content.trim().length < 50) {
                 return { valid: false, message: 'La clave parece estar incompleta' };
             }
 
-            return { valid: true, message: '✓ Formato de clave válido' };
+            return { valid: true, message: 'Formato de clave válido' };
+        }
+
+        // Obtener clave pública automáticamente desde una IP
+        async function fetchPublicKey() {
+            const ipInput = document.getElementById('recipientIp');
+            const portInput = document.getElementById('recipientPort');
+            const keyTextarea = document.getElementById('recipientPublicKey');
+            const fetchedDisplay = document.getElementById('fetchedKeyDisplay');
+            const fetchedPreview = document.getElementById('fetchedKeyPreview');
+
+            const ip = ipInput.value.trim();
+            const port = portInput.value.trim() || '5000';
+
+            if (!ip) {
+                showAlert('Por favor ingresa una IP primero', 'error');
+                return;
+            }
+
+            // Mostrar loading
+            fetchedDisplay.classList.add('show');
+            fetchedPreview.innerHTML = '<span class="loading-spinner"></span> Obteniendo clave pública...';
+
+            try {
+                const url = `http://${ip}:${port}/api/get-public-key`;
+                const response = await fetch(url, {
+                    method: 'GET',
+                    timeout: 5000
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.public_key) {
+                    keyTextarea.value = data.public_key;
+                    fetchedPreview.textContent = data.public_key;
+
+                    const validation = validatePublicKey(data.public_key);
+                    const validationDiv = document.getElementById('keyValidation');
+                    validationDiv.textContent = validation.message;
+                    validationDiv.className = 'validation-message success';
+
+                    saveContact(ip, port, data.public_key);
+
+                    showAlert('Clave pública obtenida y guardada correctamente', 'success');
+                } else {
+                    fetchedDisplay.classList.remove('show');
+                    showAlert('No se pudo obtener la clave pública. Verifica la IP y que la aplicación esté corriendo.', 'error');
+                }
+            } catch (error) {
+                fetchedDisplay.classList.remove('show');
+                showAlert(`Error de conexión: ${error.message}. Verifica que la IP sea correcta y que la aplicación esté corriendo.`, 'error');
+            }
+        }
+
+        // Guardar contacto en localStorage
+        function saveContact(ip, port, publicKey) {
+            let contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
+            const existingIndex = contacts.findIndex(c => c.ip === ip && c.port === port);
+
+            const contact = {
+                ip: ip,
+                port: port,
+                publicKey: publicKey,
+                lastUsed: new Date().toISOString()
+            };
+
+            if (existingIndex >= 0) {
+                contacts[existingIndex] = contact;
+            } else {
+                contacts.push(contact);
+            }
+
+            localStorage.setItem('contacts', JSON.stringify(contacts));
+            loadContacts();
+        }
+
+        // Cargar contactos guardados
+        function loadContacts() {
+            const contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
+            const contactsList = document.getElementById('contactsList');
+            const contactsSection = document.getElementById('contactsSection');
+
+            if (contacts.length === 0) {
+                contactsSection.style.display = 'none';
+                return;
+            }
+
+            contactsSection.style.display = 'block';
+            contacts.sort((a, b) => new Date(b.lastUsed) - new Date(a.lastUsed));
+
+            contactsList.innerHTML = contacts.map((contact, index) => {
+                const date = new Date(contact.lastUsed);
+                const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+
+                return `
+                    <div class="contact-item" onclick="selectContact(${index})">
+                        <div class="contact-info">
+                            <div class="contact-ip">${contact.ip}:${contact.port}</div>
+                            <div class="contact-date">Último uso: ${dateStr}</div>
+                        </div>
+                        <div class="contact-actions">
+                            <button type="button" class="btn btn-delete" onclick="event.stopPropagation(); deleteContact(${index})">
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Seleccionar un contacto
+        function selectContact(index) {
+            const contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
+            const contact = contacts[index];
+
+            if (!contact) return;
+
+            document.getElementById('recipientIp').value = contact.ip;
+            document.getElementById('recipientPort').value = contact.port;
+            document.getElementById('recipientPublicKey').value = contact.publicKey;
+
+            const fetchedDisplay = document.getElementById('fetchedKeyDisplay');
+            const fetchedPreview = document.getElementById('fetchedKeyPreview');
+            fetchedDisplay.classList.add('show');
+            fetchedPreview.textContent = contact.publicKey;
+
+            const validation = validatePublicKey(contact.publicKey);
+            const validationDiv = document.getElementById('keyValidation');
+            validationDiv.textContent = validation.message;
+            validationDiv.className = 'validation-message success';
+
+            document.querySelectorAll('.contact-item').forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+
+            showAlert('Contacto seleccionado: ' + contact.ip, 'success');
+        }
+
+        // Eliminar un contacto
+        function deleteContact(index) {
+            if (!confirm('¿Estás seguro de eliminar este contacto?')) {
+                return;
+            }
+
+            let contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
+            contacts.splice(index, 1);
+            localStorage.setItem('contacts', JSON.stringify(contacts));
+
+            loadContacts();
+            showAlert('Contacto eliminado', 'success');
         }
 
         // Cargar clave pública al iniciar
@@ -495,27 +795,26 @@
                 const ipContainer = document.getElementById('myIpAddresses');
 
                 if (data.success && data.ip_addresses.length > 0) {
-                    let html = '<p style="color: #1d1d1f; margin-bottom: 10px;"><strong>📍 Comparte cualquiera de estas IPs:</strong></p>';
+                    let html = '<p style="color: #1d1d1f; margin-bottom: 10px;"><strong>Comparte cualquiera de estas IPs:</strong></p>';
 
                     data.ip_addresses.forEach((addr, index) => {
                         const isZeroTier = addr.ip.startsWith('10.');
-                        const emoji = isZeroTier ? '🌐' : '📡';
                         const highlight = isZeroTier ? 'font-weight: 600; color: #34c759;' : 'color: #1d1d1f;';
 
-                        html += `<p style="${highlight}">${emoji} ${addr.ip} - ${addr.type}</p>`;
+                        html += `<p style="${highlight}">${addr.ip} - ${addr.type}</p>`;
                     });
 
                     if (data.hostname) {
-                        html += `<p style="color: #6e6e73; margin-top: 10px; font-size: 0.9em;">💻 Hostname: ${data.hostname}</p>`;
+                        html += `<p style="color: #6e6e73; margin-top: 10px; font-size: 0.9em;">Hostname: ${data.hostname}</p>`;
                     }
 
                     ipContainer.innerHTML = html;
                 } else {
-                    ipContainer.innerHTML = '<p style="color: #6e6e73;">⚠ No se detectaron direcciones IP</p>';
+                    ipContainer.innerHTML = '<p style="color: #6e6e73;">No se detectaron direcciones IP</p>';
                 }
             } catch (error) {
                 console.error('Error al cargar direcciones IP:', error);
-                document.getElementById('myIpAddresses').innerHTML = '<p style="color: #8b1e1e;">❌ Error al obtener direcciones IP</p>';
+                document.getElementById('myIpAddresses').innerHTML = '<p style="color: #8b1e1e;">Error al obtener direcciones IP</p>';
             }
         }
 
@@ -620,11 +919,12 @@
             }
         }
 
-        // Cargar clave pública, IPs y mensajes al iniciar
+        // Cargar clave pública, IPs, mensajes y contactos al iniciar
         window.addEventListener('load', () => {
             loadIpAddresses();
             loadPublicKey();
             loadMessages();
+            loadContacts();
             // Auto-actualizar mensajes cada 5 segundos
             setInterval(loadMessages, 5000);
         });
