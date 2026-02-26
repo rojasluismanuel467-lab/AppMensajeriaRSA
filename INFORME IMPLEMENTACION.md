@@ -1,4 +1,8 @@
-# Informe Técnico - Sistema de Mensajería Cifrada RSA
+# Informe  - Sistema de Mensajería Cifrada RSA
+
+LUIS MANUEL ROJAS CORREA
+ALEJANDRO CORDOBA 
+SAMUEL CHAPAVAL
 
 Sistema de mensajería cifrada implementado en Python que permite comunicación segura entre dispositivos en una red local mediante cifrado asimétrico RSA de 2048 bits con interfaz web.
 
