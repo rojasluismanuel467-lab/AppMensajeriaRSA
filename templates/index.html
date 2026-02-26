@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensajería Cifrada RSA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f7;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: #1d1d1f;
+            margin-bottom: 40px;
+            padding: 30px 0;
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 12px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            color: #6e6e73;
+            font-weight: 400;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e5e7;
+        }
+
+        .card h2 {
+            color: #1d1d1f;
+            margin-bottom: 24px;
+            font-size: 1.6em;
+            font-weight: 600;
+            border-bottom: 2px solid #34c759;
+            padding-bottom: 12px;
+            letter-spacing: -0.3px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1d1d1f;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #d2d2d7;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            background: #fbfbfd;
+            color: #1d1d1f;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #34c759;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .btn {
+            background: #34c759;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            letter-spacing: -0.2px;
+        }
+
+        .btn:hover {
+            background: #30b350;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            background: #2ea043;
+        }
+
+        .btn-secondary {
+            background: #8e8e93;
+        }
+
+        .btn-secondary:hover {
+            background: #7c7c81;
+            box-shadow: 0 4px 12px rgba(142, 142, 147, 0.3);
+        }
+
+        .btn-secondary:active {
+            background: #6e6e73;
+        }
+
+        .btn-small {
+            padding: 8px 20px;
+            font-size: 14px;
+        }
+
+        .key-display {
+            background: #f5f5f7;
+            border: 1.5px solid #d2d2d7;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 15px;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+            color: #1d1d1f;
+            line-height: 1.6;
+        }
+
+        .messages-section {
+            grid-column: 1 / -1;
+        }
+
+        .message-item {
+            background: white;
+            border: 1.5px solid #e5e5e7;
+            border-left: 4px solid #34c759;
+            padding: 16px 18px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .message-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .message-item .from {
+            color: #34c759;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .message-item .content {
+            color: #1d1d1f;
+            line-height: 1.5;
+        }
+
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d1f4dd;
+            color: #1d6f3e;
+            border: 1.5px solid #a7e8bf;
+        }
+
+        .alert-error {
+            background: #ffebee;
+            color: #8b1e1e;
+            border: 1.5px solid #ffcdd2;
+        }
+
+        .info-box {
+            background: #f5f5f7;
+            border: 1.5px solid #d2d2d7;
+            border-left: 4px solid #34c759;
+            padding: 16px 18px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+
+        .info-box p {
+            margin: 6px 0;
+            color: #1d1d1f;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .info-box strong {
+            color: #000;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #e5e5e7;
+            border-top: 3px solid #34c759;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .copy-button {
+            background: #f5f5f7;
+            border: 1.5px solid #d2d2d7;
+            color: #1d1d1f;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .copy-button:hover {
+            background: #e5e5e7;
+            border-color: #34c759;
+        }
+
+        .copy-button.copied {
+            background: #34c759;
+            color: white;
+            border-color: #34c759;
+        }
+
+        .key-container {
+            position: relative;
+        }
+
+        .validation-message {
+            font-size: 12px;
+            margin-top: 5px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .validation-message.error {
+            background: #ffebee;
+            color: #8b1e1e;
+            display: block;
+        }
+
+        .validation-message.success {
+            background: #d1f4dd;
+            color: #1d6f3e;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Mensajería Cifrada RSA</h1>
+            <p>Comunicación segura en red local con cifrado de extremo a extremo</p>
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <div class="main-content">
+            <!-- Sección de Claves -->
+            <div class="card">
+                <h2>🔑 Mis Claves</h2>
+                <div class="form-group">
+                    <button class="btn" onclick="generateKeys()">Generar Nuevas Claves</button>
+                </div>
+                <div class="form-group">
+                    <label>Mis Direcciones IP:</label>
+                    <div id="myIpAddresses" class="info-box">
+                        <p style="color: #6e6e73;">Cargando direcciones IP...</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Mi Clave Pública:</label>
+                    <div class="key-container">
+                        <div id="myPublicKey" class="key-display">
+                            Click en "Generar Nuevas Claves" para crear tu par de claves
+                        </div>
+                        <button id="copyKeyButton" class="copy-button" onclick="copyPublicKey()" style="display: none;">
+                            📋 Copiar Clave Pública
+                        </button>
+                    </div>
+                </div>
+                <div class="info-box">
+                    <p><strong>Comparte tu clave pública e IP</strong> con otros usuarios para que puedan enviarte mensajes cifrados.</p>
+                    <p><strong>Si usas ZeroTier:</strong> Usa la IP que empieza con 10.x.x.x para conectarte con dispositivos en tu red ZeroTier.</p>
+                </div>
+            </div>
+
+            <!-- Sección de Enviar Mensaje -->
+            <div class="card">
+                <h2>📤 Enviar Mensaje</h2>
+                <form id="sendMessageForm">
+                    <div class="form-group">
+                        <label for="recipientIp">IP del Destinatario:</label>
+                        <input type="text" id="recipientIp" placeholder="Ej: 192.168.1.100" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="recipientPort">Puerto (opcional):</label>
+                        <input type="text" id="recipientPort" placeholder="5000" value="5000">
+                    </div>
+                    <div class="form-group">
+                        <label for="recipientPublicKey">Clave Pública del Destinatario:</label>
+                        <textarea id="recipientPublicKey" placeholder="Pega aquí la clave pública del destinatario..." required></textarea>
+                        <div id="keyValidation" class="validation-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Mensaje:</label>
+                        <textarea id="message" placeholder="Escribe tu mensaje aquí..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn">Enviar Mensaje Cifrado</button>
+                </form>
+            </div>
+
+            <!-- Sección de Mensajes Recibidos -->
+            <div class="card messages-section">
+                <h2>📥 Mensajes Recibidos</h2>
+                <div class="button-group">
+                    <button class="btn btn-small" onclick="loadMessages()">Actualizar Mensajes</button>
+                    <button class="btn btn-secondary btn-small" onclick="clearMessages()">Limpiar Mensajes</button>
+                </div>
+                <div id="messagesList" style="margin-top: 20px;">
+                    No hay mensajes recibidos
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para mostrar alertas
+        function showAlert(message, type = 'success') {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alert.style.display = 'block';
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        // Generar claves RSA
+        async function generateKeys() {
+            try {
+                const response = await fetch('/api/generate-keys', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('myPublicKey').textContent = data.public_key;
+                    document.getElementById('copyKeyButton').style.display = 'inline-block';
+                    showAlert('¡Claves generadas exitosamente!', 'success');
+                } else {
+                    showAlert('Error al generar claves: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error de conexión: ' + error.message, 'error');
+            }
+        }
+
+        // Copiar clave pública al portapapeles
+        async function copyPublicKey() {
+            const publicKey = document.getElementById('myPublicKey').textContent;
+            const button = document.getElementById('copyKeyButton');
+
+            try {
+                await navigator.clipboard.writeText(publicKey);
+                button.textContent = '✅ ¡Copiada!';
+                button.classList.add('copied');
+
+                setTimeout(() => {
+                    button.textContent = '📋 Copiar Clave Pública';
+                    button.classList.remove('copied');
+                }, 2000);
+
+                showAlert('Clave pública copiada al portapapeles', 'success');
+            } catch (error) {
+                showAlert('Error al copiar: ' + error.message, 'error');
+            }
+        }
+
+        // Validar formato de clave pública
+        function validatePublicKey(key) {
+            if (!key || key.trim() === '') {
+                return { valid: false, message: 'La clave no puede estar vacía' };
+            }
+
+            const trimmedKey = key.trim();
+
+            if (!trimmedKey.includes('-----BEGIN PUBLIC KEY-----')) {
+                return { valid: false, message: 'Falta el inicio de la clave: -----BEGIN PUBLIC KEY-----' };
+            }
+
+            if (!trimmedKey.includes('-----END PUBLIC KEY-----')) {
+                return { valid: false, message: 'Falta el final de la clave: -----END PUBLIC KEY-----' };
+            }
+
+            // Verificar que tenga contenido entre el header y footer
+            const content = trimmedKey.split('-----BEGIN PUBLIC KEY-----')[1]?.split('-----END PUBLIC KEY-----')[0];
+            if (!content || content.trim().length < 50) {
+                return { valid: false, message: 'La clave parece estar incompleta' };
+            }
+
+            return { valid: true, message: '✓ Formato de clave válido' };
+        }
+
+        // Cargar clave pública al iniciar
+        async function loadPublicKey() {
+            try {
+                const response = await fetch('/api/get-public-key');
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('myPublicKey').textContent = data.public_key;
+                    document.getElementById('copyKeyButton').style.display = 'inline-block';
+                }
+            } catch (error) {
+                console.error('Error al cargar clave pública:', error);
+            }
+        }
+
+        // Cargar direcciones IP disponibles
+        async function loadIpAddresses() {
+            try {
+                const response = await fetch('/api/get-ip-addresses');
+                const data = await response.json();
+
+                const ipContainer = document.getElementById('myIpAddresses');
+
+                if (data.success && data.ip_addresses.length > 0) {
+                    let html = '<p style="color: #1d1d1f; margin-bottom: 10px;"><strong>📍 Comparte cualquiera de estas IPs:</strong></p>';
+
+                    data.ip_addresses.forEach((addr, index) => {
+                        const isZeroTier = addr.ip.startsWith('10.');
+                        const emoji = isZeroTier ? '🌐' : '📡';
+                        const highlight = isZeroTier ? 'font-weight: 600; color: #34c759;' : 'color: #1d1d1f;';
+
+                        html += `<p style="${highlight}">${emoji} ${addr.ip} - ${addr.type}</p>`;
+                    });
+
+                    if (data.hostname) {
+                        html += `<p style="color: #6e6e73; margin-top: 10px; font-size: 0.9em;">💻 Hostname: ${data.hostname}</p>`;
+                    }
+
+                    ipContainer.innerHTML = html;
+                } else {
+                    ipContainer.innerHTML = '<p style="color: #6e6e73;">⚠ No se detectaron direcciones IP</p>';
+                }
+            } catch (error) {
+                console.error('Error al cargar direcciones IP:', error);
+                document.getElementById('myIpAddresses').innerHTML = '<p style="color: #8b1e1e;">❌ Error al obtener direcciones IP</p>';
+            }
+        }
+
+        // Validar clave cuando el usuario pega o escribe
+        document.getElementById('recipientPublicKey').addEventListener('input', (e) => {
+            const validation = validatePublicKey(e.target.value);
+            const validationDiv = document.getElementById('keyValidation');
+
+            if (e.target.value.trim() === '') {
+                validationDiv.style.display = 'none';
+                return;
+            }
+
+            validationDiv.textContent = validation.message;
+            validationDiv.className = 'validation-message ' + (validation.valid ? 'success' : 'error');
+        });
+
+        // Enviar mensaje
+        document.getElementById('sendMessageForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const message = document.getElementById('message').value;
+            const recipientIp = document.getElementById('recipientIp').value;
+            const recipientPort = document.getElementById('recipientPort').value;
+            const recipientPublicKey = document.getElementById('recipientPublicKey').value;
+
+            // Validar la clave antes de enviar
+            const validation = validatePublicKey(recipientPublicKey);
+            if (!validation.valid) {
+                showAlert('Error: ' + validation.message, 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/send-message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        recipient_ip: recipientIp,
+                        recipient_port: recipientPort,
+                        recipient_public_key: recipientPublicKey
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('¡Mensaje enviado exitosamente!', 'success');
+                    document.getElementById('message').value = '';
+                } else {
+                    showAlert('Error al enviar mensaje: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Error de conexión: ' + error.message, 'error');
+            }
+        });
+
+        // Cargar mensajes recibidos
+        async function loadMessages() {
+            try {
+                const response = await fetch('/api/messages');
+                const data = await response.json();
+
+                const messagesList = document.getElementById('messagesList');
+
+                if (data.success && data.messages.length > 0) {
+                    messagesList.innerHTML = data.messages.map(msg => `
+                        <div class="message-item">
+                            <div class="from">De: ${msg.from_ip}</div>
+                            <div class="content">${msg.message}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    messagesList.innerHTML = '<p>No hay mensajes recibidos</p>';
+                }
+            } catch (error) {
+                showAlert('Error al cargar mensajes: ' + error.message, 'error');
+            }
+        }
+
+        // Limpiar mensajes
+        async function clearMessages() {
+            if (!confirm('¿Estás seguro de que deseas eliminar todos los mensajes?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/clear-messages', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Mensajes eliminados', 'success');
+                    loadMessages();
+                }
+            } catch (error) {
+                showAlert('Error al limpiar mensajes: ' + error.message, 'error');
+            }
+        }
+
+        // Cargar clave pública, IPs y mensajes al iniciar
+        window.addEventListener('load', () => {
+            loadIpAddresses();
+            loadPublicKey();
+            loadMessages();
+            // Auto-actualizar mensajes cada 5 segundos
+            setInterval(loadMessages, 5000);
+        });
+    </script>
+</body>
+</html>

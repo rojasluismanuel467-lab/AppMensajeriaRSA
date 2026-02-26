@@ -1,3 +1,7 @@
+# Claves privadas - NO compartir
+private_key.pem
+public_key.pem
+
 # Python
 __pycache__/
 *.py[cod]
@@ -23,15 +27,6 @@ wheels/
 .installed.cfg
 *.egg
 
-# Claves privadas (¡IMPORTANTE! Nunca subir claves privadas)
-claves/*_privada.pem
-claves/profesor_privada.pem
-*.pem
-!requirements.txt
-
-# Mensajes
-mensajes/*.txt
-
 # IDE
 .vscode/
 .idea/
@@ -39,13 +34,6 @@ mensajes/*.txt
 *.swo
 *~
 
-# Sistema operativo
+# OS
 .DS_Store
 Thumbs.db
-
-# Logs
-*.log
-
-# Temporales
-*.tmp
-.cache/
