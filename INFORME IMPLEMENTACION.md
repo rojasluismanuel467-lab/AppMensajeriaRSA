@@ -361,11 +361,12 @@ La aplicación implementa un sistema de caché de claves públicas usando LocalS
 
 ## 3. Evidencias de Implementación
 
-![alt text](image.png)
+### Interfaz de la Aplicación
 
-![alt text](image-1.png)
+![Generación de claves y obtención de clave pública](https://i.ibb.co/0VmWnF37/image.png)
 
-![alt text](image-2.png)
+![Envío de mensajes cifrados](https://i.ibb.co/Xk71Fm2q/image-1.png)
 
-![alt text](image-3.png)
+![Recepción y descifrado de mensajes](https://i.ibb.co/kgDkQhNC/image-2.png)
 
+![Flujo completo de comunicación cifrada](https://i.ibb.co/HfYGM1c7/image-3.png)
