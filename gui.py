@@ -36,6 +36,7 @@ class MensajeApp(ctk.CTk):
         self.usuario_actual = None
         self.contactos = []
         self.servidor_activo = False
+        self.interfaces_dict = {}  # Diccionario para mapear opciones de interfaz a info completa
 
         # Configurar ventana principal
         self.title("🔐 Mensajería Segura RSA")
@@ -501,40 +502,62 @@ class MensajeApp(ctk.CTk):
             font=ctk.CTkFont(size=16, weight="bold")
         ).grid(row=0, column=0, columnspan=2, padx=20, pady=(20, 10), sticky="w")
 
-        ctk.CTkLabel(servidor_frame, text="Tu IP local:").grid(row=1, column=0, padx=20, pady=10, sticky="w")
+        ctk.CTkLabel(servidor_frame, text="Interfaz de red:").grid(row=1, column=0, padx=20, pady=10, sticky="w")
+
+        # ComboBox para seleccionar interfaz de red
+        self.combo_interfaces = ctk.CTkComboBox(
+            servidor_frame,
+            values=["Cargando..."],
+            command=self.seleccionar_interfaz,
+            width=300
+        )
+        self.combo_interfaces.grid(row=1, column=1, padx=20, pady=10, sticky="w")
+
+        # Botón para refrescar interfaces
+        ctk.CTkButton(
+            servidor_frame,
+            text="🔄 Actualizar",
+            command=self.actualizar_interfaces,
+            width=100,
+            height=28,
+            corner_radius=6,
+            fg_color="#4a4a4a"
+        ).grid(row=1, column=2, padx=(0, 20), pady=10)
+
+        ctk.CTkLabel(servidor_frame, text="IP seleccionada:").grid(row=2, column=0, padx=20, pady=10, sticky="w")
         self.label_mi_ip = ctk.CTkLabel(
             servidor_frame,
-            text="Calculando...",
+            text="Selecciona una interfaz",
             font=ctk.CTkFont(size=14, weight="bold"),
             text_color="#4ade80"
         )
-        self.label_mi_ip.grid(row=1, column=1, padx=20, pady=10, sticky="w")
+        self.label_mi_ip.grid(row=2, column=1, padx=20, pady=10, sticky="w")
 
         # Botón para copiar IP
         ctk.CTkButton(
             servidor_frame,
-            text="📋 Copiar IP",
+            text="📋 Copiar",
             command=self.copiar_ip,
             width=100,
             height=25,
             corner_radius=6,
             fg_color="#4a4a4a"
-        ).grid(row=1, column=2, padx=(0, 20), pady=10)
+        ).grid(row=2, column=2, padx=(0, 20), pady=10)
 
-        ctk.CTkLabel(servidor_frame, text="Puerto:").grid(row=2, column=0, padx=20, pady=10, sticky="w")
+        ctk.CTkLabel(servidor_frame, text="Puerto:").grid(row=3, column=0, padx=20, pady=10, sticky="w")
         self.entry_puerto = ctk.CTkEntry(servidor_frame, width=100)
         self.entry_puerto.insert(0, str(PUERTO_DEFAULT))
-        self.entry_puerto.grid(row=2, column=1, padx=20, pady=10, sticky="w")
+        self.entry_puerto.grid(row=3, column=1, padx=20, pady=10, sticky="w")
 
         # Estado del servidor
-        ctk.CTkLabel(servidor_frame, text="Estado:").grid(row=3, column=0, padx=20, pady=10, sticky="w")
+        ctk.CTkLabel(servidor_frame, text="Estado:").grid(row=4, column=0, padx=20, pady=10, sticky="w")
         self.label_estado_servidor = ctk.CTkLabel(
             servidor_frame,
             text="⛔ Servidor detenido",
             font=ctk.CTkFont(size=12),
             text_color="#888888"
         )
-        self.label_estado_servidor.grid(row=3, column=1, padx=20, pady=10, sticky="w")
+        self.label_estado_servidor.grid(row=4, column=1, padx=20, pady=10, sticky="w")
 
         # Botón del servidor
         self.btn_iniciar_servidor = ctk.CTkButton(
@@ -545,7 +568,7 @@ class MensajeApp(ctk.CTk):
             corner_radius=8,
             fg_color="#10b981"
         )
-        self.btn_iniciar_servidor.grid(row=4, column=0, columnspan=3, padx=20, pady=20)
+        self.btn_iniciar_servidor.grid(row=5, column=0, columnspan=3, padx=20, pady=20)
 
         # Enviar mensaje por red
         enviar_frame = ctk.CTkFrame(main_frame, corner_radius=12, fg_color="#323232")
@@ -608,21 +631,61 @@ class MensajeApp(ctk.CTk):
         )
         btn_limpiar.grid(row=2, column=0, padx=20, pady=(0, 20), sticky="w")
 
-        # Actualizar IP local
-        self.actualizar_ip_local()
+        # Actualizar interfaces de red disponibles
+        self.actualizar_interfaces()
 
     def actualizar_ip_local(self):
         """Actualiza la etiqueta con la IP local."""
         ip = gestor.obtener_ip_local()
         self.label_mi_ip.configure(text=ip)
 
+    def actualizar_interfaces(self):
+        """Actualiza la lista de interfaces de red disponibles."""
+        from network import obtener_todas_las_ips
+
+        interfaces = obtener_todas_las_ips()
+
+        if not interfaces:
+            self.combo_interfaces.configure(values=["No hay interfaces disponibles"])
+            self.combo_interfaces.set("No hay interfaces disponibles")
+            self.label_mi_ip.configure(text="Sin interfaces")
+            return
+
+        # Crear lista de opciones con formato: "IP - Descripción (Interfaz)"
+        opciones = []
+        self.interfaces_dict = {}  # Guardar mapeo IP -> info completa
+
+        for nombre, ip, desc in interfaces:
+            opcion = f"{ip} - {desc}"
+            opciones.append(opcion)
+            self.interfaces_dict[opcion] = (nombre, ip, desc)
+
+        self.combo_interfaces.configure(values=opciones)
+
+        # Seleccionar la primera por defecto
+        if opciones:
+            self.combo_interfaces.set(opciones[0])
+            self.seleccionar_interfaz(opciones[0])
+
+        self.actualizar_status(f"Se encontraron {len(interfaces)} interfaz(ces) de red")
+
+    def seleccionar_interfaz(self, eleccion):
+        """Callback cuando se selecciona una interfaz."""
+        if eleccion and eleccion in self.interfaces_dict:
+            nombre, ip, desc = self.interfaces_dict[eleccion]
+            self.label_mi_ip.configure(text=ip)
+            self.actualizar_status(f"Interfaz seleccionada: {desc} ({ip})")
+
     def copiar_ip(self):
-        """Copia la IP local al portapapeles."""
-        ip = gestor.obtener_ip_local()
-        self.clipboard_clear()
-        self.clipboard_append(ip)
-        self.actualizar_status(f"IP {ip} copiada al portapapeles")
-        messagebox.showinfo("IP Copiada", f"Tu IP {ip} ha sido copiada al portapapeles.\n\nCompártela con tus contactos para que puedan enviarte mensajes.")
+        """Copia la IP seleccionada al portapapeles."""
+        ip = self.label_mi_ip.cget("text")
+        if ip and ip not in ["Selecciona una interfaz", "Sin interfaces"]:
+            self.clipboard_clear()
+            self.clipboard_append(ip)
+            self.actualizar_status(f"IP {ip} copiada al portapapeles")
+            messagebox.showinfo("IP Copiada", f"Tu IP {ip} ha sido copiada al portapapeles.\n\nCompártela con tus contactos para que puedan enviarte mensajes.")
+        else:
+            messagebox.showwarning("Sin IP", "Primero selecciona una interfaz de red")
     
     def configurar_gestor_red(self):
         """Configura el gestor de red con el usuario actual."""
@@ -816,10 +879,11 @@ class MensajeApp(ctk.CTk):
     
     def actualizar_status(self, mensaje: str, es_error: bool = False):
         """Actualiza la barra de estado."""
-        self.status_label.configure(
-            text=f"{'❌' if es_error else '✅'} {mensaje}",
-            text_color="#ef4444" if es_error else "#888888"
-        )
+        if hasattr(self, 'status_label'):
+            self.status_label.configure(
+                text=f"{'❌' if es_error else '✅'} {mensaje}",
+                text_color="#ef4444" if es_error else "#888888"
+            )
     
     def actualizar_usuario_label(self):
         """Actualiza la etiqueta del usuario actual."""

@@ -7,7 +7,8 @@ import socket
 import threading
 import json
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, Optional, List, Tuple
+import netifaces
 from crypto import cifrar_mensaje, descifrar_mensaje
 from keys import cargar_clave_privada, cargar_clave_publica, obtener_clave_publica_desde_privada
 
@@ -16,17 +17,70 @@ PUERTO_DEFAULT = 55555
 BUFFER_SIZE = 65536
 
 
-def obtener_ip_local() -> str:
-    """Obtiene la IP local de la máquina."""
+def obtener_todas_las_ips() -> List[Tuple[str, str, str]]:
+    """
+    Obtiene todas las interfaces de red con sus IPs.
+
+    Returns:
+        Lista de tuplas (nombre_interfaz, ip, descripción)
+    """
+    interfaces = []
+
     try:
-        # Crear socket temporal para obtener IP
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
-    except Exception:
+        for interface in netifaces.interfaces():
+            addrs = netifaces.ifaddresses(interface)
+
+            # Obtener direcciones IPv4
+            if netifaces.AF_INET in addrs:
+                for addr in addrs[netifaces.AF_INET]:
+                    ip = addr.get('addr', '')
+
+                    # Filtrar localhost
+                    if ip and ip != '127.0.0.1':
+                        # Detectar tipo de interfaz
+                        descripcion = ""
+                        interface_lower = interface.lower()
+
+                        if 'zerotier' in interface_lower or 'zt' in interface_lower:
+                            descripcion = "ZeroTier (VPN)"
+                        elif 'ethernet' in interface_lower or 'eth' in interface_lower:
+                            descripcion = "Ethernet (Cable)"
+                        elif 'wi-fi' in interface_lower or 'wlan' in interface_lower or 'wireless' in interface_lower:
+                            descripcion = "WiFi (Inalámbrica)"
+                        elif 'vmware' in interface_lower or 'virtualbox' in interface_lower:
+                            descripcion = "Máquina Virtual"
+                        else:
+                            descripcion = "Red Local"
+
+                        interfaces.append((interface, ip, descripcion))
+    except Exception as e:
+        print(f"Error obteniendo interfaces: {e}")
+
+    return interfaces
+
+
+def obtener_ip_local() -> str:
+    """
+    Obtiene la IP local de la máquina.
+    Prioriza interfaces físicas sobre virtuales.
+    """
+    interfaces = obtener_todas_las_ips()
+
+    if not interfaces:
         return "127.0.0.1"
+
+    # Prioridad: WiFi/Ethernet > ZeroTier > Otras
+    for nombre, ip, desc in interfaces:
+        if "WiFi" in desc or "Ethernet" in desc:
+            return ip
+
+    # Si no hay físicas, usar ZeroTier
+    for nombre, ip, desc in interfaces:
+        if "ZeroTier" in desc:
+            return ip
+
+    # Si no, usar la primera disponible
+    return interfaces[0][1]
 
 
 class ServidorMensajeria:
