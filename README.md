@@ -1,21 +1,14 @@
-# 🔐 Aplicación de Mensajería Cifrada con RSA
+# Aplicación de Mensajería Cifrada con RSA
 
-Aplicación web sencilla para enviar mensajes cifrados usando RSA en una red local.
+Aplicación web para enviar mensajes cifrados usando RSA en una red local.
 
-## 📋 Características
+## Instalación
 
-- ✅ Interfaz web intuitiva y moderna
-- ✅ Generación automática de claves RSA (2048 bits)
-- ✅ Cifrado de extremo a extremo
-- ✅ Comunicación en red local
-- ✅ Recepción automática de mensajes
-- ✅ Visualización de mensajes descifrados
+### 1. Requisitos
+- Python 3.7 o superior
+- Pip (gestor de paquetes de Python)
 
-## 🚀 Instalación
-
-### 1. Instalar Python
-
-Asegúrate de tener Python 3.7 o superior instalado:
+Verificar instalación:
 ```bash
 python --version
 ```
@@ -26,12 +19,50 @@ python --version
 pip install -r requirements.txt
 ```
 
-Las librerías que se instalarán son:
-- **Flask**: Framework web para la interfaz
-- **cryptography**: Librería de cifrado RSA
-- **requests**: Para enviar mensajes HTTP
+Dependencias que se instalan:
+- Flask: Framework web
+- Flask-CORS: Permitir peticiones entre diferentes IPs
+- Cryptography: Librería de cifrado RSA
+- Requests: Envío de mensajes HTTP
 
-## 💻 Uso
+### 3. Configurar Firewall (IMPORTANTE)
+
+Para que otras computadoras puedan conectarse, debes habilitar el puerto en el firewall:
+
+**Windows - Ejecutar como Administrador:**
+```bash
+netsh advfirewall firewall add rule name="Flask Port 5000" dir=in action=allow protocol=TCP localport=5000
+```
+
+**Alternativa - Permitir Python:**
+```bash
+netsh advfirewall firewall add rule name="Python Flask" dir=in action=allow program="C:\Path\To\Python\python.exe" enable=yes
+```
+(Ajustar la ruta de python.exe según tu instalación)
+
+### 4. Cerrar puerto del Firewall (Después de usar)
+
+**IMPORTANTE:** Por seguridad, cuando termines de usar la aplicación, cierra el puerto del firewall:
+
+**Eliminar la regla del puerto 5000:**
+```bash
+netsh advfirewall firewall delete rule name="Flask Port 5000"
+```
+
+**Eliminar la regla de Python:**
+```bash
+netsh advfirewall firewall delete rule name="Python Flask"
+```
+
+**Verificar que se eliminó:**
+```bash
+netsh advfirewall firewall show rule name="Flask Port 5000"
+```
+Debe mostrar: "No rules match the specified criteria"
+
+---
+
+## Uso
 
 ### 1. Iniciar la aplicación
 
@@ -39,172 +70,301 @@ Las librerías que se instalarán son:
 python app.py
 ```
 
-La aplicación se iniciará en `http://localhost:5000`
+La aplicación se inicia en: http://localhost:5000
 
-### 2. Acceder desde otra computadora
+Al iniciar verás tus direcciones IP disponibles:
+```
+Direcciones IP disponibles para compartir:
 
-Para que otros dispositivos en tu red puedan comunicarse contigo:
+  1. 192.168.1.100   - Red Local (WiFi/Ethernet)
+  2. 10.147.20.45    - Red Local / ZeroTier
+```
 
-1. **La aplicación detecta automáticamente todas tus IPs** al iniciar:
-   - Verás todas las direcciones IP disponibles en la consola
-   - También se mostrarán en la interfaz web
+### 2. Acceder a la interfaz web
 
-2. **Tipos de IPs que puedes ver:**
-   - **192.168.x.x** - Red WiFi/Ethernet local
-   - **10.x.x.x** - Generalmente ZeroTier u otras VPNs
-   - **172.16.x.x a 172.31.x.x** - Redes privadas
+**Desde la misma computadora:**
+```
+http://localhost:5000
+```
 
-3. Otros usuarios pueden acceder a tu aplicación usando:
-   ```
-   http://[TU_IP]:5000
-   ```
+**Desde otra computadora en la red:**
+```
+http://[TU_IP]:5000
+```
+Ejemplo: http://192.168.1.100:5000
 
-### 3. Uso con ZeroTier
+### 3. Generar claves
 
-Si usas ZeroTier para crear una red virtual privada:
+1. Abre la aplicación en tu navegador
+2. Click en "Generar Nuevas Claves"
+3. Tu clave pública aparecerá en pantalla
+4. Las claves se guardan automáticamente en:
+   - private_key.pem (NUNCA compartir)
+   - public_key.pem (compartir libremente)
 
-1. **Instala ZeroTier** en todos los dispositivos que quieras conectar
-2. **Une todos los dispositivos a la misma red ZeroTier**
-3. **Usa la IP de ZeroTier (generalmente 10.x.x.x)** para conectarte:
-   - La aplicación identificará automáticamente tu IP de ZeroTier
-   - Comparte esta IP con otros usuarios en tu red ZeroTier
-   - Funciona incluso si los dispositivos están en diferentes redes físicas
+### 4. Enviar mensajes
 
-**Ventajas de ZeroTier:**
-- ✅ Conecta dispositivos en diferentes ubicaciones físicas
-- ✅ Conexión segura y cifrada a nivel de red
-- ✅ No necesitas abrir puertos en tu router
-- ✅ Funciona como si estuvieras en la misma red local
+**Método 1 - Obtención automática (Recomendado):**
+1. Ingresa la IP del destinatario
+2. Click en "Obtener Clave"
+3. La aplicación obtiene automáticamente la clave pública
+4. Escribe tu mensaje
+5. Click en "Enviar Mensaje Cifrado"
 
-### 4. Enviar un mensaje cifrado
-
-1. **Generar tus claves**: Click en "Generar Nuevas Claves"
-2. **Compartir tu información**:
-   - Copia tu clave pública
-   - Comparte una de tus direcciones IP (mostradas en la interfaz)
-   - Si usas ZeroTier, comparte la IP que empieza con 10.x.x.x
-3. **Obtener la información del destinatario**: Pide su clave pública e IP
-4. **Enviar mensaje**:
-   - Ingresa la IP del destinatario
-   - Pega su clave pública
-   - Escribe tu mensaje
-   - Click en "Enviar Mensaje Cifrado"
+**Método 2 - Manual:**
+1. Pide al destinatario su clave pública
+2. Ingresa su IP
+3. Pega su clave pública en el campo correspondiente
+4. Escribe tu mensaje
+5. Click en "Enviar Mensaje Cifrado"
 
 ### 5. Recibir mensajes
 
-- Los mensajes se reciben y descifran automáticamente
+Los mensajes se reciben y descifran automáticamente.
+- Se muestran en la sección "Mensajes Recibidos"
 - Se actualizan cada 5 segundos
-- Puedes hacer click en "Actualizar Mensajes" para verlos inmediatamente
+- Puedes actualizar manualmente con el botón "Actualizar Mensajes"
 
-## 🔒 Seguridad
+---
 
-- **Cifrado RSA 2048 bits**: Nivel de seguridad estándar industrial
-- **Claves privadas locales**: Tu clave privada NUNCA sale de tu computadora
-- **Las claves se guardan en archivos locales**: `private_key.pem` y `public_key.pem`
-- **⚠️ IMPORTANTE**: NO compartas tu archivo `private_key.pem` con nadie
+## Uso con ZeroTier
 
-## 📁 Estructura del Proyecto
+ZeroTier permite conectar computadoras en diferentes ubicaciones físicas como si estuvieran en la misma red.
+
+### Configuración:
+
+1. Instalar ZeroTier en todos los dispositivos
+2. Crear una red en ZeroTier Central (https://my.zerotier.com)
+3. Unir todos los dispositivos a la misma red ZeroTier
+4. Usar la IP de ZeroTier (comienza con 10.x.x.x)
+
+### Ventajas:
+- Conecta dispositivos en diferentes ubicaciones
+- Conexión cifrada a nivel de red
+- No requiere configurar routers
+- Funciona como red local virtual
+
+### Ejemplo:
+
+**Computadora A (Casa):**
+- IP Local: 192.168.0.100
+- IP ZeroTier: 10.147.20.45
+- Comparte: 10.147.20.45
+
+**Computadora B (Oficina):**
+- IP Local: 192.168.1.200
+- IP ZeroTier: 10.147.20.78
+- Para enviar a A usa: 10.147.20.45
+
+---
+
+## Contactos Guardados
+
+La aplicación guarda automáticamente los contactos que uses:
+- Se almacenan en el navegador (localStorage)
+- Incluyen: IP, puerto y clave pública
+- Puedes seleccionarlos con un click
+- Se pueden eliminar individualmente
+
+---
+
+## Estructura del Proyecto
 
 ```
 AppMensajeria/
-│
 ├── app.py                 # Servidor Flask principal
 ├── crypto_utils.py        # Utilidades de cifrado RSA
 ├── requirements.txt       # Dependencias Python
 ├── README.md             # Este archivo
-│
 ├── templates/
 │   └── index.html        # Interfaz web
-│
-├── private_key.pem       # Tu clave privada (generada automáticamente)
-└── public_key.pem        # Tu clave pública (generada automáticamente)
+├── private_key.pem       # Clave privada (generada automáticamente)
+└── public_key.pem        # Clave pública (generada automáticamente)
 ```
 
-## 🛠️ Tecnologías Utilizadas
+---
 
-- **Python 3**: Lenguaje de programación
-- **Flask**: Framework web
-- **cryptography**: Librería de cifrado
-- **HTML/CSS/JavaScript**: Interfaz web
+## Solución de Problemas
 
-## 📝 Ejemplos de Uso
+### Error: "Failed to fetch"
+**Causa:** Falta configurar CORS o el firewall bloquea la conexión
 
-### Escenario 1: Dos computadoras en la misma red WiFi
-
-**Computadora A (192.168.1.100)**:
-1. Ejecuta `python app.py`
-2. Ve sus IPs disponibles (192.168.1.100)
-3. Genera claves y comparte la clave pública e IP
-
-**Computadora B (192.168.1.101)**:
-1. Ejecuta `python app.py`
-2. Genera claves y comparte la clave pública
-3. Para enviar mensaje a A:
-   - IP: `192.168.1.100`
-   - Puerto: `5000`
-   - Clave pública: [clave de A]
-   - Mensaje: "Hola desde B"
-
-### Escenario 2: Dos computadoras con ZeroTier en ubicaciones diferentes
-
-**Computadora A (casa) - IP ZeroTier: 10.147.20.45**:
-1. Tiene ZeroTier instalado y conectado a la red ID: abc123
-2. Ejecuta `python app.py`
-3. Ve sus IPs: 192.168.0.100 (WiFi) y 10.147.20.45 (ZeroTier)
-4. **Comparte la IP de ZeroTier: 10.147.20.45**
-
-**Computadora B (oficina) - IP ZeroTier: 10.147.20.78**:
-1. Tiene ZeroTier instalado y conectado a la MISMA red ID: abc123
-2. Ejecuta `python app.py`
-3. Para enviar mensaje a A:
-   - IP: `10.147.20.45` (la IP de ZeroTier de A)
-   - Puerto: `5000`
-   - Clave pública: [clave de A]
-   - ✅ ¡El mensaje llega aunque estén en diferentes ciudades!
-
-## ❓ Solución de Problemas
-
-### Error: "No se pudieron cargar las claves"
-- Solución: Click en "Generar Nuevas Claves"
+**Solución:**
+1. Verificar que flask-cors está instalado:
+   ```bash
+   pip install flask-cors
+   ```
+2. Habilitar puerto en firewall (ver sección Instalación)
+3. Reiniciar la aplicación
 
 ### Error: "Error de conexión"
-- Verifica que ambas computadoras estén en la misma red
-- Verifica que el firewall no esté bloqueando el puerto 5000
-- Verifica que la IP sea correcta
+**Verificar:**
+- Ambas computadoras en la misma red
+- Firewall permite el puerto 5000
+- IP correcta
+- Aplicación del destinatario está corriendo
 
-### Error: "Error al descifrar"
-- Asegúrate de estar usando la clave pública correcta del destinatario
-- Verifica que el destinatario haya generado sus claves
-
-## 🔥 Firewall (Windows)
-
-Si tienes problemas de conexión, permite Python en el firewall:
-
+**Probar conectividad:**
 ```bash
-netsh advfirewall firewall add rule name="Python Flask" dir=in action=allow program="C:\Path\To\Python\python.exe" enable=yes
+ping [IP_DESTINATARIO]
 ```
 
-O desactiva temporalmente el firewall para pruebas (no recomendado para producción).
+### Error: "No se pudo obtener la clave pública"
+**Verificar:**
+- La aplicación está corriendo en la IP destino
+- Firewall no bloquea
+- IP correcta (sin espacios extras)
 
-## 📖 Conceptos de Criptografía
+### Verificar puerto abierto:
+```bash
+netstat -an | findstr :5000
+```
+Debe mostrar: TCP 0.0.0.0:5000 LISTENING
 
-### ¿Qué es RSA?
-RSA es un algoritmo de cifrado asimétrico que usa dos claves:
-- **Clave Pública**: Se comparte libremente, sirve para CIFRAR mensajes
-- **Clave Privada**: Se mantiene secreta, sirve para DESCIFRAR mensajes
+---
 
-### Flujo de Cifrado
-1. Alice genera su par de claves (pública/privada)
-2. Bob genera su par de claves (pública/privada)
-3. Alice y Bob intercambian claves PÚBLICAS
-4. Alice cifra un mensaje con la clave PÚBLICA de Bob
-5. Bob descifra el mensaje con su clave PRIVADA
-6. Solo Bob puede leer el mensaje (ni siquiera Alice puede descifrarlo después de cifrarlo)
+## Seguridad
 
-## 📄 Licencia
+### Cifrado:
+- RSA 2048 bits (estándar industrial)
+- Cifrado de extremo a extremo
+- Solo el destinatario puede descifrar
 
-Este proyecto es de código abierto y está disponible para uso educativo.
+### Claves:
+- Clave privada: NUNCA sale de tu computadora
+- Clave pública: Se puede compartir libremente
+- Las claves se generan localmente
 
-## 👨‍💻 Autor
+### Firewall:
+- Abrir puerto SOLO cuando uses la aplicación
+- Cerrar puerto cuando termines de usar
+- Evita dejar puertos abiertos innecesariamente
+- Reduce riesgo de infiltraciones
+
+### IMPORTANTE:
+- NO compartir el archivo private_key.pem
+- NO enviar la clave privada por ningún medio
+- Solo compartir la clave pública
+- CERRAR el puerto del firewall después de usar:
+  ```bash
+  netsh advfirewall firewall delete rule name="Flask Port 5000"
+  ```
+
+---
+
+## Conceptos de Criptografía
+
+### RSA (Algoritmo de cifrado asimétrico)
+
+**Clave Pública:**
+- Se comparte libremente
+- Sirve para CIFRAR mensajes
+- Cualquiera puede cifrar con ella
+
+**Clave Privada:**
+- Se mantiene secreta
+- Sirve para DESCIFRAR mensajes
+- Solo tú puedes descifrar
+
+### Flujo de comunicación:
+
+1. Alice y Bob generan sus pares de claves
+2. Intercambian claves públicas
+3. Alice cifra mensaje con clave pública de Bob
+4. Bob descifra mensaje con su clave privada
+5. Solo Bob puede leer el mensaje
+
+---
+
+## Comandos Útiles
+
+### Verificar IP:
+```bash
+ipconfig                    # Windows
+ip addr                     # Linux
+ifconfig                    # Mac
+```
+
+### Probar conectividad:
+```bash
+ping [IP_DESTINO]
+```
+
+### Ver puertos en uso:
+```bash
+netstat -an | findstr :5000  # Windows
+netstat -an | grep 5000      # Linux/Mac
+```
+
+### Detener la aplicación:
+```
+Ctrl + C
+```
+
+### Gestión del Firewall:
+
+**Abrir puerto:**
+```bash
+netsh advfirewall firewall add rule name="Flask Port 5000" dir=in action=allow protocol=TCP localport=5000
+```
+
+**Cerrar puerto:**
+```bash
+netsh advfirewall firewall delete rule name="Flask Port 5000"
+```
+
+**Listar reglas del firewall:**
+```bash
+netsh advfirewall firewall show rule name=all | findstr "Flask"
+```
+
+**Ver estado de una regla específica:**
+```bash
+netsh advfirewall firewall show rule name="Flask Port 5000"
+```
+
+---
+
+## Ejemplo Completo
+
+### Escenario: Dos computadoras en la misma red
+
+**Computadora A (192.168.1.100):**
+1. Ejecutar: python app.py
+2. Generar claves
+3. Compartir:
+   - IP: 192.168.1.100
+   - Clave pública (copiar desde la interfaz)
+
+**Computadora B (192.168.1.101):**
+1. Ejecutar: python app.py
+2. Generar claves
+3. Abrir navegador: http://localhost:5000
+4. En "IP del Destinatario": 192.168.1.100
+5. Click "Obtener Clave" (obtiene automáticamente)
+6. Escribir mensaje: "Hola desde B"
+7. Click "Enviar Mensaje Cifrado"
+
+**Resultado en A:**
+- Mensaje aparece automáticamente en "Mensajes Recibidos"
+- Mensaje ya descifrado y legible
+
+---
+
+## Tecnologías
+
+- Python 3
+- Flask (framework web)
+- Flask-CORS (peticiones cross-origin)
+- Cryptography (cifrado RSA)
+- HTML/CSS/JavaScript (interfaz)
+
+---
+
+## Licencia
+
+Proyecto de código abierto para uso educativo.
+
+## Autor
 
 Creado para el curso de Ciberseguridad - Universidad
